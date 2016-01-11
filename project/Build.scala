@@ -1,7 +1,7 @@
 import com.typesafe.sbt.GitVersioning
 import com.typesafe.sbt.SbtGit.git
-import com.typesafe.sbt.SbtNativePackager.autoImport._
-import com.typesafe.sbt.packager.archetypes._
+// import com.typesafe.sbt.SbtNativePackager.autoImport._
+// import com.typesafe.sbt.packager.archetypes._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import org.scalajs.sbtplugin.cross.CrossType
 import sbt.Keys._
@@ -9,6 +9,10 @@ import sbt._
 import sbtbuildinfo._
 import sbtbuildinfo.BuildInfoKeys._
 import spray.revolver.RevolverPlugin._
+import android.Keys._
+import android.Dependencies.{LibraryDependency, aar}
+
+
 
 
 
@@ -53,6 +57,12 @@ object Settings {
    * the special %%% function selects the correct version for each project
    */
   val sharedDependencies = Def.setting(Seq(
+  ))
+
+  val androidDependencies = Def.setting(Seq(
+    aar("org.macroid" %% "macroid" % "2.0.0-M4"),
+    aar("org.macroid" %% "macroid-viewable" % "2.0.0-M4"),
+    aar("com.android.support" % "support-v4" % "21.0.3")
   ))
 
   /** Dependencies only used by the JVM project */
@@ -108,7 +118,7 @@ object ApplicationBuild extends Build {
 
   // root project aggregating the JS and JVM projects
   lazy val root = project.in(file(".")).
-    aggregate(js, jvm).
+    aggregate(js, jvm, roid).
     settings(
       name := Settings.name,
       scalaVersion := Settings.versions.scala,
@@ -122,6 +132,48 @@ object ApplicationBuild extends Build {
   val productionBuild = settingKey[Boolean]("Build for production")
   val elideOptions = settingKey[Seq[String]]("Set limit for elidable functions")
   val copyWebJarResources = taskKey[Unit]("Copy resources from WebJars")
+
+  // lazy val roid: Project = project.in(file("roid"))
+  lazy val roid: Project = project.in(file("roid")).settings(android.Plugin.androidBuild: _*).settings(
+    // platformTarget in Android := "android-21",
+    // name := "roid",
+    // scalaVersion := "2.11.7",
+    // run <<= run in Android,
+    // resolvers ++= Seq(
+    //   Resolver.sonatypeRepo("releases"),
+    //   "jcenter" at "http://jcenter.bintray.com"
+    // ),
+    // scalacOptions in (Compile, compile) ++=
+    //   (dependencyClasspath in Compile).value.files.map("-P:wartremover:cp:" + _.toURI.toURL),
+    // scalacOptions in (Compile, compile) ++= Seq(
+    //   "-P:wartremover:traverser:macroid.warts.CheckUi"
+    // ),
+    // javacOptions ++= Seq("-source", "1.7", "-target", "1.7"),
+    // scalacOptions ++= Seq("-feature", "-deprecation", "-target:jvm-1.7"),
+    // libraryDependencies ++= Seq(
+    //   aar("org.macroid" %% "macroid" % "2.0.0-M4"),
+    //   aar("org.macroid" %% "macroid-viewable" % "2.0.0-M4"),
+    //   aar("com.android.support" % "support-v4" % "21.0.3"),
+    //   compilerPlugin("org.brianmckenna" %% "wartremover" % "0.10")
+    // ),
+    // proguardScala in Android := true,
+    // proguardOptions in Android ++= Seq(
+    //   "-ignorewarnings",
+    //   "-keep class scala.Dynamic"
+    // )
+    name := "roid",
+    scalaVersion := Settings.versions.scala,
+    libraryDependencies ++= Settings.androidDependencies.value,
+    platformTarget in Android := "android-21",
+    // platformTarget in Android := "android-23",
+    proguardScala in Android := true,
+    proguardOptions in Android ++= Seq(
+      "-ignorewarnings",
+      "-keep class scala.Dynamic"
+    ),
+    // Override the run task with the android:run
+    run <<= run in Android
+  ).enablePlugins(BuildInfoPlugin, GitVersioning)
 
 
   // a special crossProject for configuring a JS/JVM/shared structure
@@ -229,15 +281,15 @@ object ApplicationBuild extends Build {
     scalajsOutputDir := (classDirectory in Compile).value / "web" / "js",
     mainClass in Compile := Some("com.github.matthewpflueger.isomorphic.server.Main"),
     // set environment variables in the execute scripts
-    NativePackagerKeys.bashScriptExtraDefines += """addJava "-Djava.net.preferIPv4Stack=true" """,
-    NativePackagerKeys.bashScriptExtraDefines += """addJava "-Xms1024m" """,
-    NativePackagerKeys.bashScriptExtraDefines += """addJava "-Xmx2048m" """,
+    // NativePackagerKeys.bashScriptExtraDefines += """addJava "-Djava.net.preferIPv4Stack=true" """,
+    // NativePackagerKeys.bashScriptExtraDefines += """addJava "-Xms1024m" """,
+    // NativePackagerKeys.bashScriptExtraDefines += """addJava "-Xmx2048m" """,
     // reStart depends on running fastOptJS on the JS project
 //    Revolver.reStart <<= Revolver.reStart dependsOn (fastOptJS in(js, Compile))
 
     buildInfoKeys := globalBuildInfoKeys,
     buildInfoOptions := globalBuildInfoOptions,
     buildInfoPackage := "com.github.matthewpflueger.isomorphic.server"
-  ).enablePlugins(BuildInfoPlugin, GitVersioning, JavaAppPackaging)
+  ).enablePlugins(BuildInfoPlugin, GitVersioning) //, JavaAppPackaging)
 
 }
