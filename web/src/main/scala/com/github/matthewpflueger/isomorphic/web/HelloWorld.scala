@@ -1,4 +1,4 @@
-package com.github.matthewpflueger.isomorphic.client
+package com.github.matthewpflueger.isomorphic.web
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
