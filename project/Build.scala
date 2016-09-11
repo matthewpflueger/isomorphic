@@ -8,7 +8,7 @@ import sbt.Keys._
 import sbt._
 import sbtbuildinfo._
 import sbtbuildinfo.BuildInfoKeys._
-import spray.revolver.RevolverPlugin._
+import spray.revolver.RevolverPlugin.autoImport._
 
 
 
@@ -38,14 +38,13 @@ object Settings {
 
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
-    val scala = "2.11.7"
-    val akka = "2.4.1"
-    val akkaStreams = "1.0"
+    val scala = "2.11.8"
+    val akka = "2.4.10"
 
-    val scalajsReact = "0.10.3"
-    val react = "0.14.3"
-    val scalajsDom = "0.8.2"
-    val scalaTags = "0.5.3"
+    val scalajsReact = "0.11.1"
+    val react = "15.3.1"
+    val scalajsDom = "0.9.1"
+    val scalaTags = "0.6.0"
   }
 
   /**
@@ -58,9 +57,9 @@ object Settings {
   /** Dependencies only used by the JVM project */
   val jvmDependencies = Def.setting(Seq(
     "com.typesafe.akka" %% "akka-actor" % versions.akka,
-    "com.typesafe.akka" %% "akka-stream-experimental" % versions.akkaStreams,
-    "com.typesafe.akka" %% "akka-http-core-experimental" % versions.akkaStreams,
-    "com.typesafe.akka" %% "akka-http-experimental" % versions.akkaStreams,
+    "com.typesafe.akka" %% "akka-stream" % versions.akka,
+    "com.typesafe.akka" %% "akka-http-core" % versions.akka,
+    "com.typesafe.akka" %% "akka-http-experimental" % versions.akka,
     "com.lihaoyi" %% "scalatags" % versions.scalaTags
   ))
 
@@ -156,8 +155,9 @@ object ApplicationBuild extends Build {
       unmanagedResourceDirectories in Compile += file(".") / sharedSrcDir / "src" / "main" / "resources",
       unmanagedResourceDirectories in Test += file(".") / sharedSrcDir / "src" / "test" / "resources",
 
-      javaOptions in Revolver.reStart ++= Settings.jvmRuntimeOptions,
-      mainClass in Revolver.reStart := Some("com.github.matthewpflueger.isomorphic.server.Main"),
+      // javaOptions in Revolver.reStart ++= Settings.jvmRuntimeOptions,
+      javaOptions in reStart ++= Settings.jvmRuntimeOptions,
+      mainClass in reStart := Some("com.github.matthewpflueger.isomorphic.server.Main"),
 
       // configure a specific port for debugging, so you can easily debug multiple projects at the same time if necessary
       Revolver.enableDebugging(port = 5111, suspend = false),
