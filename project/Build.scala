@@ -40,6 +40,7 @@ object Settings {
   object versions {
     val scala = "2.11.8"
     val akka = "2.4.10"
+    val j2v8 = "4.5.0"
 
     val scalajsReact = "0.11.1"
     val react = "15.3.1"
@@ -60,7 +61,8 @@ object Settings {
     "com.typesafe.akka" %% "akka-stream" % versions.akka,
     "com.typesafe.akka" %% "akka-http-core" % versions.akka,
     "com.typesafe.akka" %% "akka-http-experimental" % versions.akka,
-    "com.lihaoyi" %% "scalatags" % versions.scalaTags
+    "com.lihaoyi" %% "scalatags" % versions.scalaTags,
+    "com.eclipsesource.j2v8" % "j2v8_macosx_x86_64" % versions.j2v8
   ))
 
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
